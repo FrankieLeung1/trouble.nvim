@@ -110,7 +110,7 @@ function Trouble.help()
     height = height + 1
   end
   -- help
-  vim.lsp.util.open_floating_preview(lines, "markdown", config.options.win_config)
+  vim.lsp.util.open_floating_preview(lines, "markdown", util.scoped_opt(config.options, "config"))
 end
 
 local updater = util.debounce(100, function()

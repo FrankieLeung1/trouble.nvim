@@ -63,7 +63,7 @@ function View:new(opts)
   if opts.group ~= nil then
     group = opts.group
   else
-    group = config.options.group
+    group = util.scoped_opt(config.options, "group")
   end
 
   local this = {
@@ -467,7 +467,11 @@ function View:hover(opts)
   if not (item and item.full_text) then
     return
   end
-  vim.lsp.util.open_floating_preview(vim.split(item.full_text, "\n"), "markdown", config.options.win_config)
+  vim.lsp.util.open_floating_preview(
+    vim.split(item.full_text, "\n"),
+    "markdown",
+    util.scoped_opt(config.options, "win_config")
+  )
 end
 
 function View:jump(opts)

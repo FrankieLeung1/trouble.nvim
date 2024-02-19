@@ -3,6 +3,7 @@ local qf = require("trouble.providers.qf")
 local telescope = require("trouble.providers.telescope")
 local lsp = require("trouble.providers.lsp")
 local diagnostic = require("trouble.providers.diagnostic")
+local unity_log = require("trouble.providers.unity_log")
 
 local M = {}
 
@@ -16,6 +17,7 @@ M.providers = {
   quickfix = qf.qflist,
   loclist = qf.loclist,
   telescope = telescope.telescope,
+  unity_log = unity_log.log,
 }
 
 ---@param options TroubleOptions
@@ -36,32 +38,33 @@ function M.get(win, buf, cb, options)
     return {}
   end
 
-  local sort_keys = vim.list_extend({
-    function(item)
-      local cwd = vim.loop.fs_realpath(vim.fn.getcwd())
-      local path = vim.loop.fs_realpath(item.filename)
-      if not path then
-        return 200
-      end
-      local ret = string.find(path, cwd, 1, true) == 1 and 10 or 100
-      -- prefer non-hidden files
-      if string.find(path, ".") then
-        ret = ret + 1
-      end
-      return ret
-    end,
-  }, options.sort_keys)
-
   provider(win, buf, function(items, messages)
-    table.sort(items, function(a, b)
-      for _, key in ipairs(sort_keys) do
-        local ak = type(key) == "string" and a[key] or key(a)
-        local bk = type(key) == "string" and b[key] or key(b)
-        if ak ~= bk then
-          return ak < bk
+    if #util.scoped_opt(options, "sort_keys") > 0 then
+      local sort_keys = vim.list_extend({
+        function(item)
+          local cwd = vim.loop.fs_realpath(vim.fn.getcwd())
+          local path = vim.loop.fs_realpath(item.filename)
+          if not path then
+            return 200
+          end
+          local ret = string.find(path, cwd, 1, true) == 1 and 10 or 100
+          -- prefer non-hidden files
+          if string.find(path, ".") then
+            ret = ret + 1
+          end
+          return ret
+        end,
+      }, options.sort_keys)
+      table.sort(items, function(a, b)
+        for _, key in ipairs(sort_keys) do
+          local ak = type(key) == "string" and a[key] or key(a)
+          local bk = type(key) == "string" and b[key] or key(b)
+          if ak ~= bk then
+            return ak < bk
+          end
         end
-      end
-    end)
+      end)
+    end
     cb(items, messages)
   end, options)
 end

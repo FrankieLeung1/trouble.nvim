@@ -143,7 +143,7 @@ function renderer.render_diagnostics(view, text, items)
     text:render(indent, "Indent")
     text:render(sign .. "  ", sign_hl, { exact = true })
 
-    local lines = config.options.multiline and vim.split(diag.full_text, "\n") or { diag.text }
+    local lines = util.scoped_opt(config.options, "multiline") and vim.split(diag.full_text, "\n") or { diag.text }
 
     text:render(lines[1], "Text" .. diag.type, " ")
 
@@ -156,7 +156,13 @@ function renderer.render_diagnostics(view, text, items)
 
     text:render(" ")
 
-    text:render("[" .. diag.lnum .. ", " .. diag.col .. "]", "Location")
+    local formatter = util.scoped_opt(config.options, "location_formatter")
+    local filename
+    if formatter then
+      text:render(formatter(config.options, diag.filename, diag.lnum, diag.col), "Location")
+    else
+      text:render("[" .. (filename or "") .. diag.lnum .. ", " .. diag.col .. "]", "Location")
+    end
 
     for l = 2, #lines do
       local str = lines[l]

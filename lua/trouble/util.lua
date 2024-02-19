@@ -68,6 +68,18 @@ function M.debug(msg)
   end
 end
 
+function M.scoped_opt(opts, name)
+  local mode = opts.mode
+  local m = opts[mode]
+  if m ~= nil then
+    local v = opts[mode][name]
+    if v ~= nil then
+      return v
+    end
+  end
+  return opts[name]
+end
+
 function M.debounce(ms, fn)
   local timer = vim.loop.new_timer()
   return function(...)
