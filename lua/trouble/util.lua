@@ -202,6 +202,7 @@ function M.process_item(item, bufnr)
       ), ---@type string?
     source = item.source, ---@type string?
     severity = item.severity or 0,
+    stack = item.stack,
   }
   return ret
 end

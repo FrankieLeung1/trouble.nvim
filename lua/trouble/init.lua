@@ -255,6 +255,14 @@ function Trouble.action(action)
     view:open_code_href()
   end
 
+  if action == "stack" then
+    view:stack()
+  end
+
+  if action == "prev_qf" then
+    view:prev_qf()
+  end
+
   if Trouble[action] then
     Trouble[action]()
   end

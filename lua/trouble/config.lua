@@ -43,6 +43,8 @@ local defaults = {
     previous = "k", -- preview item
     next = "j", -- next item
     help = "?", -- help menu
+    stack = "t", -- traceback
+    prev_qf = "<BS>", -- traceback
   },
   multiline = true, -- render multi-line messages
   indent_lines = true, -- add an indent guide below the fold icons

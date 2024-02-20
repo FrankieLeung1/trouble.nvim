@@ -1,6 +1,6 @@
 local util = require("trouble.util")
 
-local M = {}
+local M = { data = {} }
 
 local severities = { E = 1, W = 2, I = 3, H = 4 }
 
@@ -8,7 +8,7 @@ function M.get_list(winid)
   local list = winid == nil and vim.fn.getqflist({ all = true }) or vim.fn.getloclist(winid, { all = true })
 
   local ret = {}
-  for _, item in pairs(list.items) do
+  for i, item in pairs(list.items) do
     local row = (item.lnum == 0 and 1 or item.lnum) - 1
     local col = (item.col == 0 and 1 or item.col) - 1
 
@@ -23,7 +23,7 @@ function M.get_list(winid)
           start = { line = row, character = col },
           ["end"] = { line = row, character = -1 },
         },
-        stack = item.stack,
+        stack = M.data[i].stack,
       }
     elseif #ret > 0 then
       ret[#ret].message = ret[#ret].message .. "\n" .. item.text
@@ -37,6 +37,7 @@ function M.get_list(winid)
   return ret
 end
 
+---@diagnostic disable-next-line: unused-local
 function M.log(_win, _buf, cb, _options)
   return cb(M.get_list())
 end

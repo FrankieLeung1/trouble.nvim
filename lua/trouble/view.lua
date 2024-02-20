@@ -489,6 +489,33 @@ function View:jump(opts)
   end
 end
 
+function View:stack()
+  local stack = self:current_item().stack
+  if not stack then
+    return
+  end
+
+  local l = {}
+  for i in ipairs(stack) do
+    local frame = stack[i]
+    table.insert(l, {
+      filename = frame.filename,
+      lnum = frame.lnum,
+      col = frame.col,
+      type = "",
+      text = (frame.text or ""),
+    })
+  end
+  vim.fn.setqflist(l)
+
+  require("trouble").refresh({ provider = "quickfix" })
+end
+
+function View:prev_qf()
+  vim.cmd("colder")
+  require("trouble").refresh({ provider = "unity_log" })
+end
+
 function View:toggle_fold()
   folds.toggle(self:current_item().filename)
   self:update()
