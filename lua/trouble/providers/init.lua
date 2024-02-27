@@ -4,6 +4,7 @@ local telescope = require("trouble.providers.telescope")
 local lsp = require("trouble.providers.lsp")
 local diagnostic = require("trouble.providers.diagnostic")
 local unity_log = require("trouble.providers.unity_log")
+local unity_stack = require("trouble.providers.unity_stack")
 
 local M = {}
 
@@ -18,6 +19,7 @@ M.providers = {
   loclist = qf.loclist,
   telescope = telescope.telescope,
   unity_log = unity_log.log,
+  unity_stack = unity_stack.log,
 }
 
 ---@param options TroubleOptions

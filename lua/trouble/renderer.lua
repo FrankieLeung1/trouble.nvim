@@ -68,15 +68,19 @@ function renderer.render(view, opts)
       text:nl()
     end
 
-    -- render file groups
-    for _, group in ipairs(grouped) do
-      if opts.open_folds then
-        folds.open(group.filename)
+    if util.scoped_opt(config.options, "group") then
+      -- render file groups
+      for _, group in ipairs(grouped) do
+        if opts.open_folds then
+          folds.open(group.filename)
+        end
+        if opts.close_folds then
+          folds.close(group.filename)
+        end
+        renderer.render_file(view, text, group.filename, group.items)
       end
-      if opts.close_folds then
-        folds.close(group.filename)
-      end
-      renderer.render_file(view, text, group.filename, group.items)
+    else
+      renderer.render_file(view, text, "", items)
     end
 
     view:render(text)

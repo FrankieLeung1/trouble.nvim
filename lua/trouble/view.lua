@@ -449,6 +449,24 @@ function View:previous_item(opts)
   end
 end
 
+function View:set_item(opts)
+  opts = opts or { skip_groups = false }
+  local line = opts.line
+  if line == nil then
+    return
+  end
+
+  for i = line, 0, -1 do
+    if self.items[i] and not (opts.skip_groups and self.items[i].is_file) then
+      vim.api.nvim_win_set_cursor(self.win, { i, self:get_col() })
+      if opts.jump then
+        self:jump()
+      end
+      return
+    end
+  end
+end
+
 function View:first_item(opts)
   opts = opts or {}
   opts.first = true
@@ -490,11 +508,15 @@ function View:jump(opts)
 end
 
 function View:stack()
-  local stack = self:current_item().stack
+  local current_item = self:current_item()
+  local stack = current_item.stack
   if not stack then
     return
   end
 
+  self.prestack_line = self:get_line()
+
+  local select_line = 0
   local l = {}
   for i in ipairs(stack) do
     local frame = stack[i]
@@ -505,15 +527,26 @@ function View:stack()
       type = "",
       text = (frame.text or ""),
     })
+    if current_item.filename == frame.filename and tostring(current_item.lnum) == frame.lnum then
+      select_line = i + 1 -- +1 to skip the group header
+    end
   end
   vim.fn.setqflist(l)
 
-  require("trouble").refresh({ provider = "quickfix" })
+  require("trouble").open({ mode = "unity_stack" })
+  self:set_item({ skip_groups = true, line = select_line })
 end
 
 function View:prev_qf()
-  vim.cmd("colder")
-  require("trouble").refresh({ provider = "unity_log" })
+  local trouble = require("trouble")
+  if config.options.mode == "unity_stack" then
+    vim.cmd("silent colder")
+    trouble.open({ mode = "unity_log" })
+    if self.prestack_line ~= nil then
+      self:set_item({ line = self.prestack_line })
+      self.prestack_line = nil
+    end
+  end
 end
 
 function View:toggle_fold()
